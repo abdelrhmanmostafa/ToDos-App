@@ -25,7 +25,10 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test1": "mocha backend/server/**/*.test.js",
+    "test-watch": "nodemon --exec \"npm run test1\"",
+    "server": "nodemon backEnd/server/server.js"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -41,5 +44,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "expect": "^24.8.0",
+    "mocha": "^6.2.0",
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
   }
 }
