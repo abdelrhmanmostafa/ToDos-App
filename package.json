@@ -9,6 +9,7 @@
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "express": "^4.17.1",
+    "lodash": "^4.17.15",
     "mongodb": "^3.2.7",
     "mongoose": "^5.6.8",
     "react": "^16.8.6",
@@ -22,11 +23,11 @@
     "redux-form": "^8.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "node backEnd/server/server.js && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "test1": "mocha backend/server/**/*.test.js",
+    "test1": "export NODE_ENV=test || SET \"NODE_ENV=test\" && mocha backend/server/**/*.test.js",
     "test-watch": "nodemon --exec \"npm run test1\"",
     "server": "nodemon backEnd/server/server.js"
   },
