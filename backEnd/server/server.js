@@ -1,6 +1,9 @@
 require('./config')
+
 var {mongoose} = require('./mongoose')
 var {Todo} = require('./models/todo')
+var {User} = require('./models/user')
+
 const express = require('express')
 const bodyparser = require('body-parser')
 const fs = require('fs')
@@ -19,9 +22,21 @@ app.use((req, res, next) =>{
     next()
 })
 
-app.post('/addtodos',(req, res) =>{
+let Authenticate = (req, res, next) =>{
+    User.findByToken(req.header('x-auth')).then((user) =>{
+        if(!user)
+            return Promise.reject()
+        req.user = user
+        req.token = req.header('x-auth')
+        next()
+    }).catch((e) =>{
+        res.status(401).send()
+    })
+}
+
+app.post('/todos',(req, res) =>{
     var todo = new Todo({
-        ...req.body
+        text: req.body.text
     })
     todo.save().then((doc) =>{
         res.send(doc)
@@ -30,7 +45,7 @@ app.post('/addtodos',(req, res) =>{
     })
 })
 
-app.get('/getall',(req, res) =>{
+app.get('/todos',(req, res) =>{
     Todo.find().then((data) => {
         res.send(data)
     }).catch((e)=>{
@@ -87,6 +102,27 @@ app.patch('/todos/:id',(req, res) =>{
     })
 })
 
+//User Routes
+
+app.post('/users',(req, res) =>{
+    let user = new User(_.pick(req.body, ['email', 'password']))
+    /*user.save().then(() =>{
+        return user.generateAuthtoken()
+    }).then((token) =>{
+        res.header('x-auth', token).send(user)
+    }).catch((e)=>{
+        res.status(400).send(e)
+    })*/
+    user.generateAuthtoken().then((token) =>{
+        res.header('x-auth', token).send(user)
+    }).catch((e)=>{
+        res.status(400).send(e)
+    })
+})
+
+app.get('/users/me', Authenticate, (req, res) =>{
+    res.send(req.user)
+})
 app.listen(process.env.PORT, ()=>{
     console.log(`server start on port ${process.env.PORT}`)
 })

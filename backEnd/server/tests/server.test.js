@@ -1,24 +1,19 @@
 const expect = require('expect')
 const request = require('supertest')
-var {app} = require('../server')
+const {app} = require('../server')
 const {Todo} = require('../models/todo')
+const {User} = require('../models/user')
 const {ObjectID} = require('mongodb')
+const {todos, fillTodos, fillUsers, users} = require('./seed')
 
-const todos = [{_id: new ObjectID(), text: "el awal"},
-                {_id: new ObjectID(), text: "el tany", completed: true, completedAt: 1234}]
-
-beforeEach(function (done) {
-    this.timeout(10000)
-    Todo.deleteMany({}).then(() =>{
-        Todo.insertMany(todos).then(() => done())
-    })
-})
+beforeEach(fillUsers)
+beforeEach(fillTodos)
 
 describe('Test Post todos', function () {
     this.timeout(10000)
     it('Should Add new Todo', (done) =>{
         var text = "post test run"
-        request(app).post('/addtodos').send({text})
+        request(app).post('/todos').send({text})
         .expect(200).expect((res) =>{
             expect(res.body.text).toBe(text)
         })
@@ -33,7 +28,7 @@ describe('Test Post todos', function () {
         })
     })
     it('Shouldn\'t Add a Todo',(done) =>{
-        request(app).post('/addtodos').send()
+        request(app).post('/todos').send()
         .expect(400)
         .end((err,res) =>{
             if(err)
@@ -49,7 +44,7 @@ describe('Test Post todos', function () {
 describe('Testing Get all Todos',function (){
     this.timeout(10000)
     it('Should get all todos',(done) =>{
-        request(app).get('/getall').expect(200).expect((res) =>{
+        request(app).get('/todos').expect(200).expect((res) =>{
             expect(res.body.length).toBe(2)
         })
         .end(done)
@@ -125,5 +120,45 @@ describe('Testing Update Todos', function(){
             expect(res.body.completedAt).toBeNull()
         })
         .end(done)
+    })
+})
+
+describe('Test get indevidual user', function(){
+    this.timeout(10000)
+    it('should return user if authenticated', (done) =>{
+        request(app).get('/users/me').set('x-auth', users[0].tokens[0].token)
+        .expect(200).expect((res)=>{
+            expect(res.body._id).toBe(users[0]._id.toHexString())
+            expect(res.body.email).toBe(users[0].email)
+        }).end(done)
+    })
+    it('should return 401 if not authenticated', (done) =>{
+        request(app).get('/users/me')
+        .expect(401).expect((res) =>{
+            expect(res.body).toEqual({})
+        }).end(done)
+    })
+})
+
+describe('Test Post Users', function(){
+    this.timeout(10000)
+    it('Should Creat a User', (done) =>{
+        request(app).post('/users').send({email: 'bo5a@example.com', password: '12345678'})
+        .expect(200).expect((res) =>{
+            expect(res.body.email).toBe('bo5a@example.com')
+            expect(res.headers['x-auth']).toBeDefined()
+            expect(res.body._id).toBeDefined()
+            User.find().then((data) =>{
+                expect(data.length).toBe(3)
+            })
+        }).end(done)
+    })
+    it('Should Return Validation Error if Request Invalide', (done) =>{
+        request(app).post('/users').send({email: 'bo5a@examp', password: '1234568'})
+        .expect(400).end(done)
+    })
+    it('should not creat user if email is used', (done) =>{
+        request(app).post('/users').send({email: users[0].email, password: users[0].password})
+        .expect(400).end(done)
     })
 })
