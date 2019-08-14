@@ -34,7 +34,7 @@ let schema = mongoose.Schema({
 
 schema.methods.generateAuthtoken = function(){
     let access = "auth"
-    let token = jwt.sign({id: this._id, access}, "123abd").toString()
+    let token = jwt.sign({id: this._id, access}, process.env.JWT_SALT).toString()
     this.tokens.push({access, token})
     return this.save().then(() =>{
         return token
@@ -48,7 +48,7 @@ schema.methods.deleteToken = function(token){
 schema.statics.findByToken = function(token){
     let decoded
     try {
-        decoded = jwt.verify(token, "123abd")
+        decoded = jwt.verify(token, process.env.JWT_SALT)
     } catch (error) {
         return Promise.reject()
     }

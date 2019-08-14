@@ -7,9 +7,9 @@ const jwt = require('jsonwebtoken')
 let user1id = new ObjectID()
 let user2id = new ObjectID()
 const users = [{_id: user1id, email: 'user1@example.com', password: '1234user', 
-                tokens: [{access: 'auth', token: jwt.sign({id: user1id, access: 'auth'}, "123abd").toString()}]},
+                tokens: [{access: 'auth', token: jwt.sign({id: user1id, access: 'auth'}, process.env.JWT_SALT).toString()}]},
             {_id: user2id, email: 'user2@example.com', password: '1234user',
-            tokens: [{access: 'auth', token: jwt.sign({id: user2id, access: 'auth'}, "123abd").toString()}]}]
+            tokens: [{access: 'auth', token: jwt.sign({id: user2id, access: 'auth'}, process.env.JWT_SALT).toString()}]}]
 
 const todos = [{_id: new ObjectID(), text: "el awal", user: user1id},
                 {_id: new ObjectID(), text: "el tany", completed: true, completedAt: 1234, user: user2id}]

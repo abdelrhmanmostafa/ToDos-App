@@ -1,4 +1,4 @@
-require('./config')
+require('./config/config')
 
 var {mongoose} = require('./mongoose')
 var {Todo} = require('./models/todo')
