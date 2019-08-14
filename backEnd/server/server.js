@@ -16,7 +16,7 @@ var app = express()
 app.use(bodyparser.json())
 app.use((req, res, next) =>{
     var now = new Date().toString()
-    fs.appendFile('server.log', `${now}: ${req.method}, ${req.url} \n`, (err) =>{
+    fs.appendFile('./backEnd/server/server.log', `${now}: ${req.method}, ${req.url} \n`, (err) =>{
         if(err)
             console.log('logging error')
     })

@@ -84,11 +84,11 @@ describe('Testing Delete Todos', function (){
         request(app).delete(`/todos/${todos[0]._id}`).set('x-auth', users[0].tokens[0].token)
         .expect(200)
         .expect((res) =>{
-            expect(res.body.text).toBe(todos[0].text)
+            expect(res.body._id).toBe(todos[0]._id.toHexString())
         })
         .expect(()=>{
-            Todo.find().then((todos)=>{
-                expect(todos.length).toBe(1)
+            Todo.findById(todos[0]._id).then((todos)=>{
+                expect(Todo).toBeFalsy()
             },(e)=> done())
         }).end(done)
     })
