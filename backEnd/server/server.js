@@ -35,9 +35,10 @@ let Authenticate = (req, res, next) =>{
     })
 }
 
-app.post('/todos',(req, res) =>{
+app.post('/todos', Authenticate, (req, res) =>{
     var todo = new Todo({
-        text: req.body.text
+        text: req.body.text,
+        user: req.user._id
     })
     todo.save().then((doc) =>{
         res.send(doc)
@@ -46,20 +47,20 @@ app.post('/todos',(req, res) =>{
     })
 })
 
-app.get('/todos',(req, res) =>{
-    Todo.find().then((data) => {
+app.get('/todos', Authenticate, (req, res) =>{
+    Todo.find({user: req.user._id}).then((data) => {
         res.send(data)
     }).catch((e)=>{
         res.status(400).send(e)
     })
 })
 
-app.get('/todos/:id', (req, res) =>{
+app.get('/todos/:id', Authenticate, (req, res) =>{
     let id = req.params.id
     if(!ObjectID.isValid(id))
         res.status(404).send()
     else{
-        Todo.findById(id).then((todo) =>{
+        Todo.findOne({_id: id, user: req.user._id}).then((todo) =>{
             if(todo)
                 res.send(todo)
             else
@@ -70,11 +71,11 @@ app.get('/todos/:id', (req, res) =>{
     }
 })
 
-app.delete('/todos/:id',(req, res) =>{
+app.delete('/todos/:id', Authenticate, (req, res) =>{
     let id = req.params.id
     if(!ObjectID.isValid(id))
         return res.status(404).send()
-    Todo.findByIdAndDelete(id).then((todo) =>{
+    Todo.findOneAndDelete({_id: id, user: req.user._id}).then((todo) =>{
         if(!todo)
             return res.status(404).send()
         res.send(todo)
@@ -83,7 +84,7 @@ app.delete('/todos/:id',(req, res) =>{
     })
 })
 
-app.patch('/todos/:id',(req, res) =>{
+app.patch('/todos/:id', Authenticate, (req, res) =>{
     let id = req.params.id
     let body = _.pick(req.body, ['text', 'completed'])
     if(!ObjectID.isValid(id))
@@ -94,7 +95,7 @@ app.patch('/todos/:id',(req, res) =>{
         body.completed = false
         body.completedAt = null
     }
-    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) =>{
+    Todo.findOneAndUpdate({_id: id, user: req.user._id}, {$set: body}, {new: true}).then((todo) =>{
         if(!todo)
             return res.status(404).send()
         res.send(todo)
