@@ -41,6 +41,10 @@ schema.methods.generateAuthtoken = function(){
     })
 }
 
+schema.methods.deleteToken = function(token){
+    return this.update({$pull: {tokens: {token}}})
+}
+
 schema.statics.findByToken = function(token){
     let decoded
     try {
@@ -52,6 +56,22 @@ schema.statics.findByToken = function(token){
         _id: decoded.id,
         'tokens.token': token,
         'tokens.access': 'auth'
+    })
+}
+
+schema.statics.findByCredentials = function(email, password){
+    return this.findOne({email}).then((user) =>{
+        if(!user)
+            return Promise.reject()
+        return new Promise((resolve, reject) =>{
+            bcrypt.compare(password, user.password, (err, result) =>{
+                if(result){
+                    resolve(user)
+                }else{
+                    reject()
+                }
+            })
+        })
     })
 }
 

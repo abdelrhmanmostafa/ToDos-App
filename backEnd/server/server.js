@@ -9,6 +9,7 @@ const bodyparser = require('body-parser')
 const fs = require('fs')
 const {ObjectID} = require('mongodb')
 const _ = require('lodash')
+const bcrypt = require('bcryptjs')
 
 var app = express()
 
@@ -123,6 +124,24 @@ app.post('/users',(req, res) =>{
 app.get('/users/me', Authenticate, (req, res) =>{
     res.send(req.user)
 })
+
+app.post('/users/login', (req, res) =>{
+    let body = _.pick(req.body, ['email', 'password'])
+    User.findByCredentials(body.email, body.password).then((user) =>{
+        return user.generateAuthtoken().then((token) =>{
+            res.header('x-auth', token).send(user)
+        })
+    }).catch((e) =>{
+        res.status(400).send()
+    })
+})
+
+app.delete('/users/me/token', Authenticate, (req, res) =>{
+    req.user.deleteToken(req.token).then(() =>{
+        res.send()
+    }).catch((e) => res.status(400).send())
+})
+
 app.listen(process.env.PORT, ()=>{
     console.log(`server start on port ${process.env.PORT}`)
 })
