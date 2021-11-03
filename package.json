@@ -23,7 +23,7 @@
     "react-test-renderer": "^16.8.6",
     "redux": "^4.0.3",
     "redux-form": "^8.2.4",
-    "validator": "^11.1.0"
+    "validator": "^13.7.0"
   },
   "scripts": {
     "start": "node backEnd/server/server.js && react-scripts start",
